@@ -1,6 +1,5 @@
 
-let picker;
+let firstInput = document.getElementById('#first')
+let secondInput = document.getElementById('#second');
 
-document.querySelectorAll('[data-date-picker]').forEach(datePicker => {
-    picker = new DatePicker(datePicker)
-})
+let picker = new DatePicker(firstInput, secondInput);

@@ -58,7 +58,8 @@ class DatePicker{
         },
     ]
 
-    private originalElement: HTMLInputElement
+    private inputElement: HTMLInputElement
+    private secondInputElement: HTMLInputElement
     private readonly rootElement: HTMLElement
     private readonly input: HTMLElement
     private readonly inputBtn: HTMLImageElement
@@ -79,6 +80,7 @@ class DatePicker{
     private animating: boolean = false
     private touchStartPos: {x: number, y: number}
     private dragStartTime: number
+    private readonly rangeMode;
 
     private _minValue: Date = new Date('0001-01-01')
     set minValue(minValue: Date | string){
@@ -91,6 +93,18 @@ class DatePicker{
 
         this.createCalendars()
     }
+
+    private action: {selectFirst: boolean, selectSecond: boolean} = {
+        selectFirst: true,
+        selectSecond: false
+    }
+    private status: {firstSelected: boolean, secondSelected: boolean} = {
+        firstSelected: false,
+        secondSelected: false
+    }
+
+    private firstDate: Date
+    private secondDate: Date
 
     private _value: Date
     get value(): Date{
@@ -110,9 +124,16 @@ class DatePicker{
     public dateFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit' }
     public dateTimeFormat: Intl.DateTimeFormat = new Intl.DateTimeFormat(navigator.language || 'it-IT', this.dateFormatOptions)
 
-    constructor(element: HTMLInputElement) {
+    constructor(input: HTMLInputElement, secondInput?: HTMLInputElement) {
 
-        this.originalElement = element
+        this.inputElement = input
+
+        if(typeof secondInput != 'undefined'){
+            this.secondInputElement = secondInput;
+            this.rangeMode = true;
+        }
+        else this.rangeMode = false;
+
         this.rootElement = document.createElement('div')
         this.input = document.createElement('div')
         this.inputBtn = document.createElement('img')
@@ -131,8 +152,13 @@ class DatePicker{
 
     private setup(){
 
-        this.originalElement.type = 'hidden'
-        this.originalElement.after(this.rootElement)
+        this.inputElement.type = 'hidden'
+
+        if(this.rangeMode){
+            this.secondInputElement.type = 'hidden'
+            this.secondInputElement.after(this.rootElement)
+        }
+        else this.inputElement.after(this.rootElement)
 
         let buttonArrow = document.createElement('div')
         let arrowPart = document.createElement('div')
@@ -194,15 +220,15 @@ class DatePicker{
         })
 
 
-        if(this.originalElement.hasAttribute('value')){
-            this._value = new Date(this.originalElement.getAttribute('value'))
+        if(this.inputElement.hasAttribute('value')){
+            this._value = new Date(this.inputElement.getAttribute('value'))
             this.inputLabel.innerText = this.dateTimeFormat.format(this._value)
         }
 
         this.currentDate = this._value || new Date()
 
-        if(this.originalElement.hasAttribute('min')){
-            this.minValue = this.originalElement.getAttribute('min')
+        if(this.inputElement.hasAttribute('min')){
+            this.minValue = this.inputElement.getAttribute('min')
         }
         else{
             this.createCalendars()
@@ -330,8 +356,19 @@ class DatePicker{
         let month = date.getMonth()
         let year = date.getFullYear()
 
+        let prevMonthYear = year
         let prevMonth = month - 1
-        if(prevMonth < 0) prevMonth = 11
+        if(prevMonth < 0) {
+            prevMonth = 11
+            prevMonthYear--
+        }
+
+        let nextMonth = month + 1
+        let nextMonthYear = year
+        if(nextMonth > 11){
+            nextMonth = 0
+            nextMonthYear++
+        }
 
         let monthStr = month < 9 ? `0${month+1}` : (month+1).toString(10)
         let firstDayDate = new Date(`${year}-${monthStr}-01`)
@@ -351,39 +388,110 @@ class DatePicker{
             cell.append(cellContent)
             calendarGrid.append(cell)
 
+            let cellDateString: string
+
             if(i < firstDay){
-                cellContent.innerText = `${DatePicker.months[prevMonth].days-(firstDay-i-1)}`
+                let day = `${DatePicker.months[prevMonth].days-(firstDay-i-1)}`
+                cellContent.innerText = day
                 cell.classList.add(DatePicker.baseClass+"__cell--disabled")
+                cellDateString = DatePicker.createDateString(prevMonthYear, prevMonth, parseInt(day));
             }
             else if(i < currentMothDays+firstDay){
                 let day = i-firstDay+1
                 cellContent.innerText = day.toString()
 
-                let date = new Date(DatePicker.createDateString(year, month, day))
+                let dateStr = DatePicker.createDateString(year, month, day)
+                cellDateString = dateStr;
+                let date = new Date(dateStr)
 
                 if(typeof (this._minValue) !== 'undefined' && date.getTime() < this._minValue.getTime()){
                     cell.classList.add(DatePicker.baseClass+"__cell--disabled")
-                    continue
                 }
+                else {
+                    if(typeof (this._value) !== 'undefined' && this._value.getTime() === date.getTime()){
+                        this.selectCell(cell)
+                    }
 
-                if(typeof (this._value) !== 'undefined' && this._value.getTime() === date.getTime()){
-                    this.selectCell(cell)
+                    cellContent.addEventListener('click', () => {
+                        this.selectCell(cell)
+                        this.pickDate.bind(this)(year, month, day)
+                    })
+
+                    cellContent.addEventListener('mouseover', () => {
+                        this.cellMouseOverHandler(cell)
+                    })
                 }
-
-                cellContent.addEventListener('click', () => {
-                    this.selectCell(cell)
-                    this.pickDate.bind(this)(year, month, day)
-                })
 
             }
             else{
-                cellContent.innerText = `${i-(currentMothDays + firstDay)+1}`
+                let day = `${i-(currentMothDays + firstDay)+1}`;
+                cellContent.innerText = day
                 cell.classList.add(DatePicker.baseClass+"__cell--disabled")
+
+                cellDateString = DatePicker.createDateString(nextMonthYear, nextMonth, parseInt(day));
             }
+
+            cell.dataset.date = cellDateString;
+
+            if(this.rangeMode){
+                this.updateCellRangeView(cell)
+            }
+
         }
 
         this.calendarsContainer.append(calendarGrid)
         return calendarGrid
+    }
+
+    private updateRangeView(){
+        for(let calendar of this.calendars){
+            calendar.querySelectorAll('.'+DatePicker.baseClass+"__cell").forEach(cell =>
+                this.updateCellRangeView(<HTMLElement>cell)
+            );
+        }
+    }
+
+    private updateCellRangeView(cell: HTMLElement){
+        let cellDate = new Date(cell.dataset.date)
+        cell.classList.remove(DatePicker.baseClass+"__cell--in-range")
+        cell.classList.remove(DatePicker.baseClass+"__cell--range-first")
+        cell.classList.remove(DatePicker.baseClass+"__cell--range-second")
+
+        if(this.status.firstSelected && this.status.secondSelected){
+            if(cellDate.getTime() > this.firstDate.getTime() && cellDate.getTime() < this.secondDate.getTime()){
+                cell.classList.add(DatePicker.baseClass+"__cell--in-range")
+            }
+            else{
+                cell.classList.remove(DatePicker.baseClass+"__cell--in-range")
+            }
+
+            if(this.secondDate.getTime() === cellDate.getTime()){
+                cell.classList.add(DatePicker.baseClass+"__cell--range-second")
+            }
+        }
+
+        if(this.status.firstSelected && this.firstDate.getTime() === cellDate.getTime()){
+            cell.classList.add(DatePicker.baseClass+"__cell--range-first")
+        }
+    }
+
+    private cellMouseOverHandler(overCell: HTMLElement){
+        if(this.rangeMode && this.action.selectSecond){
+            let overCellDate = new Date(overCell.dataset.date)
+
+            this.calendars[1].querySelectorAll('.'+DatePicker.baseClass+"__cell").forEach(cell => {
+                let cellDate = new Date((<HTMLElement>cell).dataset.date)
+
+                cell.classList.remove(DatePicker.baseClass + "__cell--in-range")
+                cell.classList.remove(DatePicker.baseClass+"__cell--range-second")
+
+                if(cellDate.getTime() < overCellDate.getTime() && cellDate.getTime() > this.firstDate.getTime()) {
+                    cell.classList.add(DatePicker.baseClass + "__cell--in-range")
+                }
+            })
+
+            overCell.classList.add(DatePicker.baseClass+"__cell--range-second")
+        }
     }
 
     private selectCell(cell: HTMLElement){
@@ -530,10 +638,43 @@ class DatePicker{
 
         let dateStr = DatePicker.createDateString(year, month, day)
 
-        this.originalElement.setAttribute('value', dateStr)
+        if(!this.rangeMode) this.inputElement.value = dateStr
         this._value = new Date(dateStr)
-        this.inputLabel.innerText = this.dateTimeFormat.format(this._value)
-        this.calendarFrame.blur()
+        if(!this.rangeMode) this.inputLabel.innerText = this.dateTimeFormat.format(this._value)
+
+        if(this.rangeMode){
+            if(this.action.selectFirst || this._value.getTime() < this.firstDate.getTime()){
+                this.firstDate = this._value
+                this.action = {
+                    selectFirst: false,
+                    selectSecond: true
+                }
+                this.status = {
+                    firstSelected: true,
+                    secondSelected: false
+                }
+            }
+            else {
+                this.secondDate = this._value
+                this.action = {
+                    selectFirst: true,
+                    selectSecond: false
+                }
+                this.status.secondSelected = true
+            }
+
+            this.updateRangeView()
+
+            if(this.status.secondSelected){
+                let firstDate = this.dateTimeFormat.format(this.firstDate)
+                let secondDate = this.dateTimeFormat.format((this.secondDate))
+                this.inputLabel.innerText = `${firstDate} - ${secondDate}`
+                this.inputElement.value = firstDate
+                this.secondInputElement.value = secondDate
+            }
+        }
+
+        if(!this.rangeMode || this.rangeMode && this.status.secondSelected)this.calendarFrame.blur()
     }
 
 }

@@ -157,6 +157,8 @@ $accent-color: cornflowerblue;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: .1em;
+    margin-bottom: .1em;
     //outline: none;
     //-webkit-tap-highlight-color: transparent;
 
@@ -179,7 +181,7 @@ $accent-color: cornflowerblue;
       background-color: transparentize($accent-color, .6)
     }
 
-    &--selected &__content{
+    &--selected &__content, &--range-first &__content, &--range-second &__content{
       background-color: $accent-color;
       color: #ffffff;
     }
@@ -187,6 +189,20 @@ $accent-color: cornflowerblue;
     &--disabled &__content{
       color: #d0d0d0;
       cursor: default;
+    }
+
+    &--in-range, &--range-first, &--range-second{
+      background-color: transparentize($accent-color, .8);
+    }
+
+    &--range-first{
+      border-bottom-left-radius: 50%;
+      border-top-left-radius: 50%;
+    }
+
+    &--range-second{
+      border-bottom-right-radius: 50%;
+      border-top-right-radius: 50%;
     }
 
   }

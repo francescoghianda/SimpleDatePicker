@@ -135,6 +135,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
 }
 .__fgc_date-picker__cell__content {
   display: flex;
@@ -152,13 +154,24 @@
 .__fgc_date-picker__cell:not(.__fgc_date-picker__cell--disabled):not(.__fgc_date-picker__cell--selected) .__fgc_date-picker__cell__content:hover {
   background-color: rgba(100, 149, 237, 0.4);
 }
-.__fgc_date-picker__cell--selected .__fgc_date-picker__cell__content {
+.__fgc_date-picker__cell--selected .__fgc_date-picker__cell__content, .__fgc_date-picker__cell--range-first .__fgc_date-picker__cell__content, .__fgc_date-picker__cell--range-second .__fgc_date-picker__cell__content {
   background-color: cornflowerblue;
   color: #ffffff;
 }
 .__fgc_date-picker__cell--disabled .__fgc_date-picker__cell__content {
   color: #d0d0d0;
   cursor: default;
+}
+.__fgc_date-picker__cell--in-range, .__fgc_date-picker__cell--range-first, .__fgc_date-picker__cell--range-second {
+  background-color: rgba(100, 149, 237, 0.2);
+}
+.__fgc_date-picker__cell--range-first {
+  border-bottom-left-radius: 50%;
+  border-top-left-radius: 50%;
+}
+.__fgc_date-picker__cell--range-second {
+  border-bottom-right-radius: 50%;
+  border-top-right-radius: 50%;
 }
 
 /*# sourceMappingURL=DatePicker.css.map */

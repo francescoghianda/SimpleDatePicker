@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9b484f27-3f37-4d0a-a6a5-3757790ff95f" name="Default Changelist" comment="" />
+    <list default="true" id="9b484f27-3f37-4d0a-a6a5-3757790ff95f" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/DatePicker.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/DatePicker.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/DatePicker.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/css/DatePicker.css.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/DatePicker.scss" beforeDir="false" afterPath="$PROJECT_DIR$/css/DatePicker.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/DatePicker.ts" beforeDir="false" afterPath="$PROJECT_DIR$/js/DatePicker.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/script.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/script.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -19,7 +27,11 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="ProjectId" id="1nrJz0sSdjF7ovEAQdUe3z7mRZm" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -54,7 +66,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1612142536184</updated>
-      <workItem from="1612142538119" duration="42825000" />
+      <workItem from="1612142538119" duration="55239000" />
     </task>
     <servers />
   </component>
